@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Bird Collision Risk Map</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+    :root {
+      --bg: #0b1f1a;
+      --panel: #102822;
+      --panel-alt: #0e241f;
+      --accent: #4ec07f;
+      --low: #45a049;
+      --medium: #f5b312;
+      --high: #d02e2e;
+      --ink: #e8f5ee;
+      --muted: #9bb8aa;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 16px 40px rgba(0,0,0,0.3);
+      --pin-size: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Manrope', 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(78,192,127,0.15), transparent 35%),
+                  radial-gradient(circle at 80% 10%, rgba(245,179,18,0.12), transparent 32%),
+                  var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 24px 36px;
+    }
+    header h1 {
+      margin: 0 0 6px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 3fr 1.25fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .map-panel, .sidebar {
+      background: linear-gradient(145deg, var(--panel), var(--panel-alt));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .map-panel {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .panel-header {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .panel-header h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: 0.2px;
+    }
+    .legend {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .legend span {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .legend .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    .map-shell {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      cursor: grab;
+      background: #0a1915;
+      min-height: 520px;
+    }
+    .map-shell.dragging {
+      cursor: grabbing;
+    }
+    .map-viewport {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+    }
+    .map-canvas {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    #base-map {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+      filter: saturate(0.94) contrast(1.02);
+    }
+    #pins-layer {
+      position: absolute;
+      inset: 0;
+    }
+    .pin {
+      position: absolute;
+      width: var(--pin-size);
+      height: var(--pin-size);
+      border-radius: 50%;
+      border: 2px solid #f5f5f5;
+      transform: translate(-50%, -100%);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+    .pin::after {
+      content: '';
+      position: absolute;
+      bottom: calc(var(--pin-size) * -0.28);
+      left: 50%;
+      width: calc(var(--pin-size) * 0.45);
+      height: calc(var(--pin-size) * 0.45);
+      background: inherit;
+      transform: translateX(-50%) rotate(45deg);
+      border-bottom: 2px solid #f5f5f5;
+      border-right: 2px solid #f5f5f5;
+      border-radius: 2px;
+    }
+    .pin:hover {
+      transform: translate(-50%, -105%) scale(1.05);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.4);
+    }
+    .pin.active {
+      box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+      transform: translate(-50%, -105%) scale(1.08);
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .sidebar {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    select, input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.12s ease, background 0.12s ease;
+    }
+    select:focus, input[type="number"]:focus {
+      border-color: rgba(78,192,127,0.9);
+      background: rgba(255,255,255,0.08);
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #43b874, #2f8f5c);
+      color: #f4fff8;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      box-shadow: 0 10px 18px rgba(67,184,116,0.25);
+    }
+    .button.secondary {
+      background: linear-gradient(135deg, #1f2f2b, #182621);
+      color: var(--muted);
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+    .button:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 12px rgba(67,184,116,0.15);
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+    .list {
+      display: grid;
+      gap: 8px;
+      max-height: 240px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .list button {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+      transition: border 0.12s ease, background 0.12s ease, transform 0.1s ease;
+    }
+    .list button:hover {
+      background: rgba(255,255,255,0.05);
+      transform: translateY(-1px);
+    }
+    .list button.active {
+      border-color: rgba(78,192,127,0.8);
+      background: rgba(78,192,127,0.07);
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #0a1915;
+      font-weight: 700;
+    }
+    .chip.low, .chip.Low { background: var(--low); }
+    .chip.Median { background: var(--medium); }
+    .chip.High { background: var(--high); color: #ffeaea; }
+    .detail {
+      display: grid;
+      gap: 10px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .score-box {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .score-box strong {
+      font-size: 18px;
+    }
+    .placement-badge {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px dashed rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.03);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .status-bar {
+      margin: 10px 18px 16px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-bar strong { color: var(--ink); }
+    .mobile-note { display: none; }
+    .corner-bird {
+      position: absolute;
+      top: -18px;
+      left: -18px;
+      width: 110px;
+      opacity: 0.9;
+      pointer-events: none;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+    }
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .map-panel { min-height: 420px; }
+      .mobile-note { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Campus Bird Collision Risk Map</h1>
+      <p>Place markers on the campus map, inspect risks per building, and edit scores live.</p>
+    </header>
+
+    <div class="layout">
+      <section class="map-panel">
+        <!--<img src="bird2.png" alt="Bird illustration" class="corner-bird">-->
+        <div class="panel-header">
+          <h2>Interactive Map</h2>
+          <div class="legend">
+            <span><span class="dot" style="background: var(--low)"></span>Low</span>
+            <span><span class="dot" style="background: var(--medium)"></span>Median</span>
+            <span><span class="dot" style="background: var(--high)"></span>High</span>
+          </div>
+        </div>
+        <div class="map-shell" id="map-shell" aria-label="Campus map">
+          <div class="map-viewport" id="map-viewport">
+            <div class="map-canvas" id="map-canvas">
+              <img id="base-map" src="map.jpg" alt="Campus map" draggable="false">
+              <div id="pins-layer" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+        <div class="status-bar">
+          <div><strong>Pan:</strong> click + drag &nbsp;|&nbsp; <strong>Zoom:</strong> mouse wheel</div>
+          <div id="status-text">Select a building, then click “Place pin” and drop it on the map.</div>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="card">
+          <h3>Add Building</h3>
+          <label for="new-building-name">Name</label>
+          <input id="new-building-name" type="text" placeholder="e.g., New Habitat Lab">
+          <div class="detail-grid" style="margin-top:10px;">
+            <div>
+              <label for="new-glass">Glass</label>
+              <input id="new-glass" type="number" min="0" max="10" step="0.1" value="5">
+            </div>
+            <div>
+              <label for="new-vegetation">Vegetation</label>
+              <input id="new-vegetation" type="number" min="0" max="10" step="0.1" value="5">
+            </div>
+            <div>
+              <label for="new-light">Light</label>
+              <input id="new-light" type="number" min="0" max="10" step="0.1" value="5">
+            </div>
+            <div>
+              <label for="new-location">Location</label>
+              <input id="new-location" type="number" min="0" max="10" step="0.1" value="5">
+            </div>
+            <div>
+              <label for="new-prevention">Prevention</label>
+              <input id="new-prevention" type="number" min="0" max="10" step="0.1" value="5">
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="button" type="button" id="create-building">Create & place pin</button>
+            <button class="button secondary" type="button" id="reset-new-building">Reset</button>
+          </div>
+          <div class="hint">Adds a new building with these values, sets it active, and lets you drop its pin.</div>
+        </div>
+
+        <div class="card">
+          <h3>Drop a Pin</h3>
+          <label for="building-select">Choose building</label>
+          <select id="building-select"></select>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="button" type="button" id="place-pin">Place pin on map</button>
+            <button class="button secondary" type="button" id="remove-pin">Remove pin</button>
+          </div>
+          <div style="margin-top:12px;">
+            <label for="pin-size">Pin size <span id="pin-size-value"></span></label>
+            <input id="pin-size" type="range" min="14" max="44" step="1">
+          </div>
+          <div class="hint">After clicking “Place pin”, click on the map where the building sits. Pin color follows the live risk level.</div>
+        </div>
+
+        <div class="card">
+          <h3>Buildings</h3>
+          <div class="list" id="building-list"></div>
+          <div class="hint mobile-note">On touch devices, pinch to zoom and drag to pan the map.</div>
+        </div>
+
+        <div class="card">
+          <h3>Details & Editing</h3>
+          <div id="detail-empty" class="hint">Select a building from the list or by clicking its pin.</div>
+          <form id="detail-form" class="detail" style="display:none;">
+            <div class="score-box">
+              <div>
+                <div id="detail-title" style="font-weight:700;">Building</div>
+                <div id="detail-level" class="chip">Level</div>
+              </div>
+              <div>
+                <div style="font-size:12px; color:var(--muted);">Score</div>
+                <strong id="detail-score">0.0</strong>
+              </div>
+            </div>
+            <div>
+              <label for="detail-name">Building name</label>
+              <input id="detail-name" type="text" autocomplete="off">
+            </div>
+            <div class="detail-grid">
+              <div>
+                <label for="glass">Glass</label>
+                <input id="glass" name="Glass" type="number" min="0" max="10" step="0.1">
+              </div>
+              <div>
+                <label for="vegetation">Vegetation</label>
+                <input id="vegetation" name="Vegetation" type="number" min="0" max="10" step="0.1">
+              </div>
+              <div>
+                <label for="light">Light</label>
+                <input id="light" name="Light" type="number" min="0" max="10" step="0.1">
+              </div>
+              <div>
+                <label for="location">Location</label>
+                <input id="location" name="Location" type="number" min="0" max="10" step="0.1">
+              </div>
+              <div>
+                <label for="prevention">Prevention</label>
+                <input id="prevention" name="Prevention" type="number" min="0" max="10" step="0.1">
+              </div>
+            </div>
+            <div class="placement-badge" id="placement-info"></div>
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const riskColors = { Low: getComputedStyle(document.documentElement).getPropertyValue('--low'), Median: getComputedStyle(document.documentElement).getPropertyValue('--medium'), High: getComputedStyle(document.documentElement).getPropertyValue('--high') };
+    const dataState = new Map(); // building -> entry values
+    const pins = new Map(); // building -> {el, xPct, yPct}
+    let placementTarget = null;
+    let activeBuilding = null;
+    let mapSize = { width: 1200, height: 800 };
+    let scale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let isPanning = false;
+    let dragMoved = false;
+    let panStart = { x: 0, y: 0 };
+    let minScale = 0.5;
+    let maxScale = 3;
+
+    const buildingSelect = document.getElementById('building-select');
+    const buildingList = document.getElementById('building-list');
+    const detailForm = document.getElementById('detail-form');
+    const detailEmpty = document.getElementById('detail-empty');
+    const detailTitle = document.getElementById('detail-title');
+    const detailNameInput = document.getElementById('detail-name');
+    const detailLevel = document.getElementById('detail-level');
+    const detailScore = document.getElementById('detail-score');
+    const placementInfo = document.getElementById('placement-info');
+    const statusText = document.getElementById('status-text');
+    const pinSizeInput = document.getElementById('pin-size');
+    const pinSizeValue = document.getElementById('pin-size-value');
+    const newBuildingName = document.getElementById('new-building-name');
+    const newGlass = document.getElementById('new-glass');
+    const newVegetation = document.getElementById('new-vegetation');
+    const newLight = document.getElementById('new-light');
+    const newLocation = document.getElementById('new-location');
+    const newPrevention = document.getElementById('new-prevention');
+    const pinsLayer = document.getElementById('pins-layer');
+    const mapShell = document.getElementById('map-shell');
+    const mapViewport = document.getElementById('map-viewport');
+    const mapCanvas = document.getElementById('map-canvas');
+    const mapImage = document.getElementById('base-map');
+
+    document.getElementById('place-pin').addEventListener('click', () => {
+      const building = buildingSelect.value;
+      if (!building) {
+        statusText.textContent = 'Pick a building first.';
+        return;
+      }
+      placementTarget = building;
+      statusText.textContent = `Click on the map to drop a pin for ${building}.`;
+    });
+
+    document.getElementById('remove-pin').addEventListener('click', () => {
+      const building = activeBuilding || buildingSelect.value;
+      if (building && pins.has(building)) {
+        removePin(building);
+        updatePlacementInfo(building);
+        statusText.textContent = `Pin removed for ${building}.`;
+      }
+    });
+    document.getElementById('create-building').addEventListener('click', createBuilding);
+    document.getElementById('reset-new-building').addEventListener('click', resetNewBuildingForm);
+    pinSizeInput.addEventListener('input', handlePinSizeChange);
+    detailNameInput.addEventListener('change', () => {
+      if (!activeBuilding) return;
+      renameActiveBuilding(detailNameInput.value.trim());
+    });
+
+    async function boot() {
+      await loadCsv();
+      populateBuildingSelect();
+      renderBuildingList();
+      setupMap();
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      detailForm.addEventListener('input', handleDetailInput);
+      const initialPinSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pin-size')) || 24;
+      pinSizeInput.value = initialPinSize;
+      handlePinSizeChange();
+      resetNewBuildingForm();
+    }
+
+    async function loadCsv() {
+      const res = await fetch('bird_collision_risk.csv');
+      const text = await res.text();
+      const rows = parseCsv(text);
+      rows.forEach(row => {
+        const entry = normalizeEntry(row);
+        dataState.set(entry.building, entry);
+      });
+    }
+
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines.shift().split(',').map(h => h.trim());
+      return lines.map(line => {
+        const cells = line.split(',').map(c => c.trim());
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = cells[i]; });
+        return obj;
+      });
+    }
+
+    function normalizeEntry(row) {
+      const entry = {
+        building: row.Building || row.building,
+        Glass: parseFloat(row.Glass),
+        Vegetation: parseFloat(row.Vegetation),
+        Light: parseFloat(row.Light),
+        Location: parseFloat(row.Location),
+        Prevention: parseFloat(row.Prevention)
+      };
+      entry.Score = computeScore(entry);
+      entry.Level = computeRisk(entry.Score);
+      return entry;
+    }
+
+    function computeScore(entry) {
+      const glass = entry.Glass ?? 0;
+      const vegetation = entry.Vegetation ?? 0;
+      const light = entry.Light ?? 0;
+      const location = entry.Location ?? 0;
+      const prevention = entry.Prevention ?? 0;
+      const score = glass * 0.35 + vegetation * 0.25 + light * 0.2 + location * 0.15 + prevention * 0.05;
+      return parseFloat(score.toFixed(2));
+    }
+
+    function computeRisk(score) {
+      if (score < 4) return 'Low';
+      if (score <= 7) return 'Median';
+      return 'High';
+    }
+
+    function populateBuildingSelect() {
+      buildingSelect.innerHTML = '<option value="">Select building</option>';
+      [...dataState.values()]
+        .sort((a, b) => a.building.localeCompare(b.building))
+        .forEach(entry => {
+          const opt = document.createElement('option');
+          opt.value = entry.building;
+          opt.textContent = entry.building;
+          buildingSelect.appendChild(opt);
+        });
+    }
+
+    function renderBuildingList() {
+      buildingList.innerHTML = '';
+      const entries = [...dataState.values()].sort((a, b) => a.building.localeCompare(b.building));
+      entries.forEach(entry => {
+        const btn = document.createElement('button');
+        btn.dataset.building = entry.building;
+        if (entry.building === activeBuilding) btn.classList.add('active');
+        const left = document.createElement('div');
+        left.textContent = entry.building;
+        const right = document.createElement('div');
+        const chip = document.createElement('span');
+        chip.className = `chip ${entry.Level}`;
+        chip.textContent = entry.Level;
+        right.appendChild(chip);
+        if (pins.has(entry.building)) {
+          const pill = document.createElement('span');
+          pill.className = 'status-pill';
+          pill.textContent = 'Pinned';
+          right.appendChild(pill);
+        }
+        btn.appendChild(left);
+        btn.appendChild(right);
+        btn.addEventListener('click', () => {
+          selectBuilding(entry.building);
+        });
+        buildingList.appendChild(btn);
+      });
+    }
+
+    function selectBuilding(building) {
+      activeBuilding = building;
+      buildingSelect.value = building;
+      renderBuildingList();
+      showDetail(building);
+      highlightPin(building);
+      statusText.textContent = `Editing ${building}.`;
+    }
+
+    function showDetail(building) {
+      const entry = dataState.get(building);
+      if (!entry) return;
+      detailEmpty.style.display = 'none';
+      detailForm.style.display = 'grid';
+      detailTitle.textContent = building;
+      detailNameInput.value = building;
+      detailScore.textContent = entry.Score.toFixed(2);
+      detailLevel.textContent = entry.Level;
+      detailLevel.className = `chip ${entry.Level}`;
+      ['Glass','Vegetation','Light','Location','Prevention'].forEach(key => {
+        const el = document.getElementById(key.toLowerCase());
+        el.value = entry[key];
+      });
+      updatePlacementInfo(building);
+    }
+
+    function updatePlacementInfo(building) {
+      if (pins.has(building)) {
+        const pin = pins.get(building);
+        placementInfo.textContent = `Pin placed at x ${pin.xPct.toFixed(1)}%, y ${pin.yPct.toFixed(1)}%. Click “Place pin” to move it.`;
+      } else {
+        placementInfo.textContent = 'No pin yet. Click “Place pin” and drop it on the map.';
+      }
+    }
+
+    function handleDetailInput(evt) {
+      const field = evt.target.name;
+      if (!field || !activeBuilding) return;
+      const entry = dataState.get(activeBuilding);
+      if (!entry) return;
+      entry[field] = clampNumber(parseFloat(evt.target.value), 0, 10);
+      entry.Score = computeScore(entry);
+      entry.Level = computeRisk(entry.Score);
+      detailScore.textContent = entry.Score.toFixed(2);
+      detailLevel.textContent = entry.Level;
+      detailLevel.className = `chip ${entry.Level}`;
+      renderBuildingList();
+      updatePinAppearance(activeBuilding);
+    }
+
+    function clampNumber(value, min, max) {
+      if (Number.isNaN(value)) return min;
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function handlePinSizeChange() {
+      const size = clampNumber(parseFloat(pinSizeInput.value), 10, 60);
+      document.documentElement.style.setProperty('--pin-size', `${size}px`);
+      pinSizeValue.textContent = `${Math.round(size)}px`;
+    }
+
+    function renameActiveBuilding(newName) {
+      if (!activeBuilding) return;
+      const trimmed = newName.trim();
+      const oldName = activeBuilding;
+      if (!trimmed) {
+        detailNameInput.value = oldName;
+        statusText.textContent = 'Name cannot be empty.';
+        return;
+      }
+      if (trimmed === oldName) return;
+      if (dataState.has(trimmed)) {
+        detailNameInput.value = oldName;
+        statusText.textContent = 'A building with this name already exists.';
+        return;
+      }
+      const entry = dataState.get(oldName);
+      if (!entry) return;
+      dataState.delete(oldName);
+      entry.building = trimmed;
+      dataState.set(trimmed, entry);
+      if (pins.has(oldName)) {
+        const pin = pins.get(oldName);
+        pins.delete(oldName);
+        pins.set(trimmed, pin);
+        pin.el.title = trimmed;
+      }
+      if (placementTarget === oldName) placementTarget = trimmed;
+      activeBuilding = trimmed;
+      populateBuildingSelect();
+      buildingSelect.value = trimmed;
+      renderBuildingList();
+      showDetail(trimmed);
+      highlightPin(trimmed);
+      statusText.textContent = `Renamed to ${trimmed}.`;
+    }
+
+    function createBuilding() {
+      const name = newBuildingName.value.trim();
+      if (!name) {
+        statusText.textContent = 'Enter a building name first.';
+        return;
+      }
+      if (dataState.has(name)) {
+        statusText.textContent = 'A building with this name already exists.';
+        selectBuilding(name);
+        return;
+      }
+      const entry = {
+        building: name,
+        Glass: clampNumber(parseFloat(newGlass.value), 0, 10),
+        Vegetation: clampNumber(parseFloat(newVegetation.value), 0, 10),
+        Light: clampNumber(parseFloat(newLight.value), 0, 10),
+        Location: clampNumber(parseFloat(newLocation.value), 0, 10),
+        Prevention: clampNumber(parseFloat(newPrevention.value), 0, 10)
+      };
+      entry.Score = computeScore(entry);
+      entry.Level = computeRisk(entry.Score);
+      dataState.set(name, entry);
+      populateBuildingSelect();
+      renderBuildingList();
+      selectBuilding(name);
+      placementTarget = name;
+      statusText.textContent = `New building added. Click on the map to place ${name}.`;
+      buildingSelect.value = name;
+    }
+
+    function resetNewBuildingForm() {
+      newBuildingName.value = '';
+      [newGlass, newVegetation, newLight, newLocation, newPrevention].forEach(el => el.value = 5);
+    }
+
+    function setupMap() {
+      mapImage.addEventListener('load', () => {
+        mapSize = { width: mapImage.naturalWidth, height: mapImage.naturalHeight };
+        mapCanvas.style.width = mapSize.width + 'px';
+        mapCanvas.style.height = mapSize.height + 'px';
+        fitMapToView();
+      });
+      if (mapImage.complete) {
+        mapSize = { width: mapImage.naturalWidth, height: mapImage.naturalHeight };
+        mapCanvas.style.width = mapSize.width + 'px';
+        mapCanvas.style.height = mapSize.height + 'px';
+        fitMapToView();
+      }
+      mapShell.addEventListener('wheel', handleZoom, { passive: false });
+      mapShell.addEventListener('mousedown', startPan);
+      window.addEventListener('mousemove', onPan);
+      window.addEventListener('mouseup', endPan);
+      mapShell.addEventListener('click', handleMapClick);
+    }
+
+    function handleResize() {
+      fitMapToView();
+    }
+
+    function fitMapToView() {
+      const viewW = mapShell.clientWidth;
+      const viewH = mapShell.clientHeight;
+      if (!viewW || !viewH || !mapSize.width || !mapSize.height) return;
+      const scaleX = viewW / mapSize.width;
+      const scaleY = viewH / mapSize.height;
+      scale = Math.min(scaleX, scaleY);
+      minScale = Math.min(scale, 0.6);
+      maxScale = Math.max(2.5, scale + 1.5);
+      translateX = (viewW - mapSize.width * scale) / 2;
+      translateY = (viewH - mapSize.height * scale) / 2;
+      applyTransform();
+    }
+
+    function applyTransform() {
+      clampTranslation();
+      mapViewport.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+
+    function clampTranslation() {
+      const viewW = mapShell.clientWidth;
+      const viewH = mapShell.clientHeight;
+      const mapW = mapSize.width * scale;
+      const mapH = mapSize.height * scale;
+      const minX = Math.min(0, viewW - mapW);
+      const minY = Math.min(0, viewH - mapH);
+      const maxX = Math.max(0, viewW - mapW);
+      const maxY = Math.max(0, viewH - mapH);
+      translateX = Math.min(Math.max(translateX, minX - 80), maxX + 80);
+      translateY = Math.min(Math.max(translateY, minY - 80), maxY + 80);
+    }
+
+    function startPan(e) {
+      if (e.target.closest('.pin')) return;
+      isPanning = true;
+      dragMoved = false;
+      mapShell.classList.add('dragging');
+      panStart = { x: e.clientX, y: e.clientY };
+    }
+
+    function onPan(e) {
+      if (!isPanning) return;
+      const dx = e.clientX - panStart.x;
+      const dy = e.clientY - panStart.y;
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
+      translateX += dx;
+      translateY += dy;
+      panStart = { x: e.clientX, y: e.clientY };
+      applyTransform();
+    }
+
+    function endPan() {
+      if (!isPanning) return;
+      isPanning = false;
+      mapShell.classList.remove('dragging');
+      setTimeout(() => { dragMoved = false; }, 50);
+    }
+
+    function handleZoom(e) {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      const newScale = clampNumber(scale * zoomFactor, minScale, maxScale);
+      const rect = mapShell.getBoundingClientRect();
+      const offsetX = (e.clientX - rect.left - translateX) / scale;
+      const offsetY = (e.clientY - rect.top - translateY) / scale;
+      translateX = e.clientX - rect.left - offsetX * newScale;
+      translateY = e.clientY - rect.top - offsetY * newScale;
+      scale = newScale;
+      applyTransform();
+    }
+
+    function handleMapClick(e) {
+      if (dragMoved) return;
+      if (!placementTarget) return;
+      const coords = clientToMapCoords(e.clientX, e.clientY);
+      if (!coords) return;
+      upsertPin(placementTarget, coords.xPct, coords.yPct);
+      selectBuilding(placementTarget);
+      statusText.textContent = `Pin placed for ${placementTarget}.`;
+      placementTarget = null;
+    }
+
+    function clientToMapCoords(clientX, clientY) {
+      const rect = mapShell.getBoundingClientRect();
+      const x = (clientX - rect.left - translateX) / scale;
+      const y = (clientY - rect.top - translateY) / scale;
+      if (x < 0 || y < 0 || x > mapSize.width || y > mapSize.height) return null;
+      return { xPct: (x / mapSize.width) * 100, yPct: (y / mapSize.height) * 100 };
+    }
+
+    function upsertPin(building, xPct, yPct) {
+      let pin = pins.get(building);
+      if (!pin) {
+        const el = document.createElement('button');
+        el.className = 'pin';
+        el.title = building;
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectBuilding(building);
+        });
+        pinsLayer.appendChild(el);
+        pin = { el, xPct, yPct };
+        pins.set(building, pin);
+      } else {
+        pin.xPct = xPct;
+        pin.yPct = yPct;
+      }
+      updatePinAppearance(building);
+      renderBuildingList();
+    }
+
+    function removePin(building) {
+      const pin = pins.get(building);
+      if (pin) {
+        pin.el.remove();
+        pins.delete(building);
+      }
+      renderBuildingList();
+      if (activeBuilding === building) {
+        highlightPin(null);
+      }
+    }
+
+    function updatePinAppearance(building) {
+      const pin = pins.get(building);
+      const entry = dataState.get(building);
+      if (!pin || !entry) return;
+      pin.el.style.left = `${pin.xPct}%`;
+      pin.el.style.top = `${pin.yPct}%`;
+      pin.el.style.background = riskColors[entry.Level] || '#999';
+      pin.el.dataset.level = entry.Level;
+      highlightPin(activeBuilding);
+    }
+
+    function highlightPin(building) {
+      pins.forEach((pin, key) => {
+        if (key === building) pin.el.classList.add('active');
+        else pin.el.classList.remove('active');
+      });
+    }
+
+    boot();
+  </script>
+</body>
+</html>

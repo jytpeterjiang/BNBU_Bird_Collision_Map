@@ -1,0 +1,39 @@
+我想通过网页实现一个校园鸟撞风险地图
+我会提供给你以下材料：
+1：一张校园地图的图片: map.jpg
+2：每个校园建筑的鸟撞风险评估表格
+bird_collision_risk.xlsx
+bird_collision_risk.csv
+两个表格数据一致
+我想实现的功能如下：
+1：我可以在网页中放置图钉来标记建筑
+2：图钉的颜色取决于该建筑对应表格中的Risk等级
+Low: 绿色
+Median: 黄色
+High: 红色
+3：点击图钉，可以显示具体的每一项的数值，例如我点击了Learning Resource Centre的图钉后会显示
+Learning Resource Centre
+Glass: 10
+Vegetation: 8
+Light: 8
+Location: 9
+Prevention: 7
+Score: 8.8
+Risk: High
+4: 我可以实时修改每一项的数值并计算出新的Score和Risk，Score的计算公式如下
+Score = Glass * 0.35 + Vegetation * 0.25 + Light * 0.2 + Location * 0.15 + Prevention * 0.05
+Risk = Low if Score < 4
+Risk = Median if 4 <= Score <= 7
+Risk = High if Score > 7
+同时图钉的颜色也会实时更新
+5：地图可以实现缩放和拖动等基础地图游览功能，暂不需要道路规划等复杂功能
+6: 尽可能美观符合鸟类保护的主题
+7：编写基本的说明文档
+请你给出可行的方案和完整可运行的代码，代码中要求为全英文
+
+你基本完成了我的要求，请你继续完成我的新需求：
+1：图钉的默认大小太小，我希望新增一个可以调整图钉大小的滑动条
+2：支持修改建筑名称并实时更新到数据库中
+3：新增一个功能：用户可以新增建筑图钉并放置
+对于新增的建筑图钉，数据结构同之前的建筑保持一致，并且可以实时更新到数据库中
+4：美化：尝试将bird2.png放在地图外框的左上角
