@@ -418,19 +418,29 @@
           <div class="hint">Adds a new building with these values, sets it active, and lets you drop its pin.</div>
         </div>
 
+      <div class="card">
+        <h3>Drop a Pin</h3>
+        <label for="building-select">Choose building</label>
+        <select id="building-select"></select>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="button" type="button" id="place-pin">Place pin on map</button>
+          <button class="button secondary" type="button" id="remove-pin">Remove pin</button>
+        </div>
+        <div style="margin-top:12px;">
+          <label for="pin-size">Pin size <span id="pin-size-value"></span></label>
+          <input id="pin-size" type="range" min="200" max="400" step="1">
+        </div>
+        <div class="hint">After clicking “Place pin”, click on the map where the building sits. Pin color follows the live risk level.</div>
+      </div>
+
         <div class="card">
-          <h3>Drop a Pin</h3>
-          <label for="building-select">Choose building</label>
-          <select id="building-select"></select>
-          <div style="display:flex; gap:8px; margin-top:10px;">
-            <button class="button" type="button" id="place-pin">Place pin on map</button>
-            <button class="button secondary" type="button" id="remove-pin">Remove pin</button>
+          <h3>Backup & Sync</h3>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="button" type="button" id="export-json">Export JSON</button>
+            <button class="button secondary" type="button" id="import-json">Import JSON</button>
+            <input id="import-file" type="file" accept=".json,application/json" style="display:none;">
           </div>
-          <div style="margin-top:12px;">
-            <label for="pin-size">Pin size <span id="pin-size-value"></span></label>
-            <input id="pin-size" type="range" min="200" max="400" step="1">
-          </div>
-          <div class="hint">After clicking “Place pin”, click on the map where the building sits. Pin color follows the live risk level.</div>
+          <div class="hint">Export your current pins/data to a JSON file and import it on another computer to restore the same state.</div>
         </div>
 
         <div class="card">
@@ -518,6 +528,9 @@
     const statusText = document.getElementById('status-text');
     const pinSizeInput = document.getElementById('pin-size');
     const pinSizeValue = document.getElementById('pin-size-value');
+    const exportBtn = document.getElementById('export-json');
+    const importBtn = document.getElementById('import-json');
+    const importFileInput = document.getElementById('import-file');
     const newBuildingName = document.getElementById('new-building-name');
     const newGlass = document.getElementById('new-glass');
     const newVegetation = document.getElementById('new-vegetation');
@@ -551,6 +564,9 @@
     document.getElementById('create-building').addEventListener('click', createBuilding);
     document.getElementById('reset-new-building').addEventListener('click', resetNewBuildingForm);
     pinSizeInput.addEventListener('input', handlePinSizeChange);
+    exportBtn.addEventListener('click', exportStateToFile);
+    importBtn.addEventListener('click', () => importFileInput.click());
+    importFileInput.addEventListener('change', handleImportFile);
     detailNameInput.addEventListener('change', () => {
       if (!activeBuilding) return;
       renameActiveBuilding(detailNameInput.value.trim());
@@ -585,19 +601,7 @@
       try {
         isRestoring = true;
         const saved = JSON.parse(raw);
-        const savedEntries = saved.entries || {};
-        Object.keys(savedEntries).forEach(name => {
-          const e = savedEntries[name];
-          const entry = normalizeEntry({ Building: name, Glass: e.Glass, Vegetation: e.Vegetation, Light: e.Light, Location: e.Location, Prevention: e.Prevention, PinSize: e.PinSize });
-          dataState.set(entry.building, entry);
-        });
-        const savedPins = saved.pins || {};
-        Object.keys(savedPins).forEach(name => {
-          const pin = savedPins[name];
-          if (dataState.has(name)) {
-            upsertPin(name, pin.xPct, pin.yPct);
-          }
-        });
+        restoreStateFromObject(saved, { wipe: false });
         if (saved.pinSize) {
           pinSizeInput.value = saved.pinSize;
           handlePinSizeChange();
@@ -651,8 +655,7 @@
       return 'High';
     }
 
-    function persistState() {
-      if (isRestoring) return;
+    function buildStatePayload() {
       const entries = {};
       dataState.forEach((entry, name) => {
         entries[name] = {
@@ -669,10 +672,12 @@
       pins.forEach((pin, name) => {
         pinsState[name] = { xPct: pin.xPct, yPct: pin.yPct };
       });
-      const payload = {
-        entries,
-        pins: pinsState
-      };
+      return { entries, pins: pinsState };
+    }
+
+    function persistState() {
+      if (isRestoring) return;
+      const payload = buildStatePayload();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }
 
@@ -1051,6 +1056,74 @@
         if (key === building) pin.el.classList.add('active');
         else pin.el.classList.remove('active');
       });
+    }
+
+    function restoreStateFromObject(saved, { wipe }) {
+      if (!saved) return;
+      isRestoring = true;
+      if (wipe) {
+        dataState.clear();
+        pins.forEach(p => p.el.remove());
+        pins.clear();
+        activeBuilding = null;
+      }
+      const savedEntries = saved.entries || {};
+      Object.keys(savedEntries).forEach(name => {
+        const e = savedEntries[name];
+        const entry = normalizeEntry({ Building: name, Glass: e.Glass, Vegetation: e.Vegetation, Light: e.Light, Location: e.Location, Prevention: e.Prevention, PinSize: e.PinSize });
+        dataState.set(entry.building, entry);
+      });
+      const savedPins = saved.pins || {};
+      Object.keys(savedPins).forEach(name => {
+        const pin = savedPins[name];
+        if (dataState.has(name)) {
+          upsertPin(name, pin.xPct, pin.yPct);
+        }
+      });
+      persistState();
+      populateBuildingSelect();
+      renderBuildingList();
+      highlightPin(activeBuilding);
+      if (activeBuilding && dataState.has(activeBuilding)) {
+        showDetail(activeBuilding);
+      } else {
+        detailForm.style.display = 'none';
+        detailEmpty.style.display = 'block';
+      }
+      isRestoring = false;
+    }
+
+    function exportStateToFile() {
+      const payload = buildStatePayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      a.href = url;
+      a.download = `bird-map-state-${stamp}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      statusText.textContent = 'Exported JSON.';
+    }
+
+    function handleImportFile(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          restoreStateFromObject(parsed, { wipe: true });
+          statusText.textContent = 'Imported JSON and applied state.';
+        } catch (err) {
+          console.error(err);
+          statusText.textContent = 'Failed to import JSON.';
+        } finally {
+          importFileInput.value = '';
+        }
+      };
+      reader.readAsText(file);
     }
 
     function startPinDrag(e, building) {

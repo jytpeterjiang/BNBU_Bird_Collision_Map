@@ -26,6 +26,7 @@ A single-page web app to place pins on a campus map, view collision risk per bui
 - **Map controls:** Drag to pan; mouse wheel (or pinch) to zoom.
 - **Add a building:** Fill out the “Add Building” card (name + scores) and click **Create & place pin**. The new item appears in the list and can be placed like others.
 - **Persistence:** Pin positions, edits, new buildings, and pin size are saved to your browser (localStorage). Reloading the page keeps your work.
+- **Export/Import:** Use the Backup & Sync card to download your state as JSON and import it on another machine to restore pins and edits.
 - **Custom pin icons:** Pins use `green.png`, `yellow.png`, and `red.png` based on risk, and the size slider affects these icons.
 
 ## Scoring logic
