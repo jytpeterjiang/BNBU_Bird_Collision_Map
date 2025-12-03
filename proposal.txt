@@ -63,3 +63,11 @@ Risk = High if Score > 7
 Add building下的name和Details & Editing下的Building name的背景为白色，字体为黑色，请改背景为主题的深绿色，而字体为白色，类似于之前的设计，这样不显得突兀
 
 目前的网站记忆存在游览器缓存中，这不太方便同步到别的电脑上，有没有方法保存到本地的一个文件中的记忆？
+
+这是我的网站logo设计，请你添加到我的网页的合适且醒目的位置，并且让favicon也为这个logo
+
+我想固定制作人的信息在地图下面靠左的位置
+头像：portrait.jpg
+作者：jytpeterjiang
+Github图标：github.png
+Github仓库链接：https://github.com/jytpeterjiang/BNBU_Bird_Collision_Map
