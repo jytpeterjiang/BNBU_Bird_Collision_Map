@@ -498,7 +498,7 @@
         </div>
         <div style="margin-top:12px;">
           <label for="pin-size">Pin size <span id="pin-size-value"></span></label>
-          <input id="pin-size" type="range" min="200" max="400" step="1">
+          <input id="pin-size" type="range" min="100" max="400" step="1">
         </div>
         <div class="hint">After clicking “Place pin”, click on the map where the building sits. Pin color follows the live risk level.</div>
       </div>
@@ -702,7 +702,7 @@
         Light: parseFloat(row.Light),
         Location: parseFloat(row.Location),
         Prevention: parseFloat(row.Prevention),
-        PinSize: clampNumber(parseFloat(row.PinSize ?? row.pinsize ?? NaN) || 200, 200, 400)
+        PinSize: clampNumber(parseFloat(row.PinSize ?? row.pinsize ?? NaN) || 200, 100, 400)
       };
       entry.Score = computeScore(entry);
       entry.Level = computeRisk(entry.Score);
@@ -855,7 +855,7 @@
         statusText.textContent = 'Select a building to resize its marker.';
         return;
       }
-      const size = clampNumber(parseFloat(pinSizeInput.value), 200, 400);
+      const size = clampNumber(parseFloat(pinSizeInput.value), 100, 400);
       const entry = dataState.get(activeBuilding);
       if (!entry) return;
       entry.PinSize = size;
@@ -920,7 +920,7 @@
         Light: clampNumber(parseFloat(newLight.value), 0, 10),
         Location: clampNumber(parseFloat(newLocation.value), 0, 10),
         Prevention: clampNumber(parseFloat(newPrevention.value), 0, 10),
-        PinSize: clampNumber(parseFloat(pinSizeInput.value) || 200, 200, 400)
+        PinSize: clampNumber(parseFloat(pinSizeInput.value) || 200, 100, 400)
       };
       entry.Score = computeScore(entry);
       entry.Level = computeRisk(entry.Score);
@@ -1113,7 +1113,7 @@
       if (!pin || !entry) return;
       pin.el.style.left = `${pin.xPct}%`;
       pin.el.style.top = `${pin.yPct}%`;
-      const size = clampNumber(entry.PinSize ?? 200, 200, 400);
+      const size = clampNumber(entry.PinSize ?? 200, 100, 400);
       pin.el.style.setProperty('--pin-size', `${size}px`);
       pin.el.style.backgroundImage = `url(${riskIcons[entry.Level] || riskIcons.Low})`;
       pin.el.style.setProperty('--pin-tail-color', riskColors[entry.Level] || '#999');
