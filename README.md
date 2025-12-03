@@ -19,12 +19,14 @@ A single-page web app to place pins on a campus map, view collision risk per bui
 - **Place a pin:** Pick a building from the dropdown → click **Place pin on map** → click the correct spot on the map. Color = live risk (Low green, Median yellow, High red).
 - **Select:** Click a pin or a building in the list to open its details.
 - **Edit values:** Adjust Glass / Vegetation / Light / Location / Prevention (0–10). Score and risk update instantly, and the pin color follows.
-- **Resize pins:** Use the Pin size slider to make markers larger or smaller.
+- **Resize pins per-building:** Use the Pin size slider (200–400px) while a building is selected; only that marker changes size.
 - **Rename buildings:** Change the building name in the detail panel; the list, dropdown, and pin tooltip update immediately.
 - **Move a pin:** Click **Place pin** again for the same building, then click a new spot.
 - **Remove:** Click **Remove pin** with the building selected.
 - **Map controls:** Drag to pan; mouse wheel (or pinch) to zoom.
 - **Add a building:** Fill out the “Add Building” card (name + scores) and click **Create & place pin**. The new item appears in the list and can be placed like others.
+- **Persistence:** Pin positions, edits, new buildings, and pin size are saved to your browser (localStorage). Reloading the page keeps your work.
+- **Custom pin icons:** Pins use `green.png`, `yellow.png`, and `red.png` based on risk, and the size slider affects these icons.
 
 ## Scoring logic
 ```

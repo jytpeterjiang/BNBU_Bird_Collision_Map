@@ -18,7 +18,7 @@
       --muted: #9bb8aa;
       --border: rgba(255,255,255,0.08);
       --shadow: 0 16px 40px rgba(0,0,0,0.3);
-      --pin-size: 24px;
+      --pin-size: 200px;
     }
     * { box-sizing: border-box; }
     body {
@@ -31,7 +31,7 @@
       min-height: 100vh;
     }
     .page {
-      max-width: 1400px;
+      max-width: 1800px;
       margin: 0 auto;
       padding: 20px 24px 36px;
     }
@@ -46,9 +46,10 @@
     }
     .layout {
       display: grid;
-      grid-template-columns: 3fr 1.25fr;
+      grid-template-columns: minmax(0, 1fr) 360px;
       gap: 16px;
       margin-top: 18px;
+      align-items: start;
     }
     .map-panel, .sidebar {
       background: linear-gradient(145deg, var(--panel), var(--panel-alt));
@@ -99,7 +100,9 @@
       overflow: hidden;
       cursor: grab;
       background: #0a1915;
-      min-height: 520px;
+      aspect-ratio: 1.4;
+      width: 100%;
+      height: clamp(520px, calc((100vw - 420px) / 1.4), 1500px);
     }
     .map-shell.dragging {
       cursor: grabbing;
@@ -129,27 +132,31 @@
     }
     .pin {
       position: absolute;
-      width: var(--pin-size);
-      height: var(--pin-size);
+      width: calc(var(--pin-size) * 1.5);
+      height: calc(var(--pin-size) * 1.5);
       border-radius: 50%;
-      border: 2px solid #f5f5f5;
+      border: none;
       transform: translate(-50%, -100%);
       box-shadow: 0 6px 16px rgba(0,0,0,0.35);
       cursor: pointer;
       transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 120%;
+      background-color: transparent;
     }
     .pin::after {
       content: '';
       position: absolute;
-      bottom: calc(var(--pin-size) * -0.28);
+      bottom: calc(var(--pin-size) * -0.25);
       left: 50%;
-      width: calc(var(--pin-size) * 0.45);
-      height: calc(var(--pin-size) * 0.45);
-      background: inherit;
+      width: calc(var(--pin-size) * 0.2);
+      height: calc(var(--pin-size) * 0.2);
+      background: var(--pin-tail-color, #4ec07f);
       transform: translateX(-50%) rotate(45deg);
-      border-bottom: 2px solid #f5f5f5;
-      border-right: 2px solid #f5f5f5;
       border-radius: 2px;
+      border: 2px solid rgba(0,0,0,0.2);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
     }
     .pin:hover {
       transform: translate(-50%, -105%) scale(1.05);
@@ -191,12 +198,12 @@
       color: var(--muted);
       margin-bottom: 6px;
     }
-    select, input[type="number"] {
+    select, input[type="number"], input[type="text"] {
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
+      background: var(--panel-alt);
       color: var(--ink);
       font-family: inherit;
       font-size: 14px;
@@ -206,6 +213,10 @@
     select:focus, input[type="number"]:focus {
       border-color: rgba(78,192,127,0.9);
       background: rgba(255,255,255,0.08);
+    }
+    select option {
+      background: var(--panel);
+      color: var(--ink);
     }
     .button {
       display: inline-flex;
@@ -417,7 +428,7 @@
           </div>
           <div style="margin-top:12px;">
             <label for="pin-size">Pin size <span id="pin-size-value"></span></label>
-            <input id="pin-size" type="range" min="14" max="44" step="1">
+            <input id="pin-size" type="range" min="200" max="400" step="1">
           </div>
           <div class="hint">After clicking “Place pin”, click on the map where the building sits. Pin color follows the live risk level.</div>
         </div>
@@ -477,11 +488,15 @@
 
   <script>
     const riskColors = { Low: getComputedStyle(document.documentElement).getPropertyValue('--low'), Median: getComputedStyle(document.documentElement).getPropertyValue('--medium'), High: getComputedStyle(document.documentElement).getPropertyValue('--high') };
+    const riskIcons = { Low: 'green.png', Median: 'yellow.png', High: 'red.png' };
+    const STORAGE_KEY = 'bird-collision-map-state';
+    let isRestoring = false;
+    let draggingPin = null;
     const dataState = new Map(); // building -> entry values
     const pins = new Map(); // building -> {el, xPct, yPct}
     let placementTarget = null;
     let activeBuilding = null;
-    let mapSize = { width: 1200, height: 800 };
+    let mapSize = { width: 5600, height: 4000 };
     let scale = 1;
     let translateX = 0;
     let translateY = 0;
@@ -543,15 +558,14 @@
 
     async function boot() {
       await loadCsv();
+      loadPersistedState();
       populateBuildingSelect();
       renderBuildingList();
       setupMap();
       handleResize();
       window.addEventListener('resize', handleResize);
       detailForm.addEventListener('input', handleDetailInput);
-      const initialPinSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pin-size')) || 24;
-      pinSizeInput.value = initialPinSize;
-      handlePinSizeChange();
+      pinSizeValue.textContent = '';
       resetNewBuildingForm();
     }
 
@@ -563,6 +577,36 @@
         const entry = normalizeEntry(row);
         dataState.set(entry.building, entry);
       });
+    }
+
+    function loadPersistedState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        isRestoring = true;
+        const saved = JSON.parse(raw);
+        const savedEntries = saved.entries || {};
+        Object.keys(savedEntries).forEach(name => {
+          const e = savedEntries[name];
+          const entry = normalizeEntry({ Building: name, Glass: e.Glass, Vegetation: e.Vegetation, Light: e.Light, Location: e.Location, Prevention: e.Prevention, PinSize: e.PinSize });
+          dataState.set(entry.building, entry);
+        });
+        const savedPins = saved.pins || {};
+        Object.keys(savedPins).forEach(name => {
+          const pin = savedPins[name];
+          if (dataState.has(name)) {
+            upsertPin(name, pin.xPct, pin.yPct);
+          }
+        });
+        if (saved.pinSize) {
+          pinSizeInput.value = saved.pinSize;
+          handlePinSizeChange();
+        }
+      } catch (err) {
+        console.error('Failed to load saved state', err);
+      } finally {
+        isRestoring = false;
+      }
     }
 
     function parseCsv(text) {
@@ -583,7 +627,8 @@
         Vegetation: parseFloat(row.Vegetation),
         Light: parseFloat(row.Light),
         Location: parseFloat(row.Location),
-        Prevention: parseFloat(row.Prevention)
+        Prevention: parseFloat(row.Prevention),
+        PinSize: clampNumber(parseFloat(row.PinSize ?? row.pinsize ?? NaN) || 200, 200, 400)
       };
       entry.Score = computeScore(entry);
       entry.Level = computeRisk(entry.Score);
@@ -604,6 +649,31 @@
       if (score < 4) return 'Low';
       if (score <= 7) return 'Median';
       return 'High';
+    }
+
+    function persistState() {
+      if (isRestoring) return;
+      const entries = {};
+      dataState.forEach((entry, name) => {
+        entries[name] = {
+          building: entry.building,
+          Glass: entry.Glass,
+          Vegetation: entry.Vegetation,
+          Light: entry.Light,
+          Location: entry.Location,
+          Prevention: entry.Prevention,
+          PinSize: entry.PinSize
+        };
+      });
+      const pinsState = {};
+      pins.forEach((pin, name) => {
+        pinsState[name] = { xPct: pin.xPct, yPct: pin.yPct };
+      });
+      const payload = {
+        entries,
+        pins: pinsState
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }
 
     function populateBuildingSelect() {
@@ -666,6 +736,8 @@
       detailScore.textContent = entry.Score.toFixed(2);
       detailLevel.textContent = entry.Level;
       detailLevel.className = `chip ${entry.Level}`;
+      pinSizeInput.value = entry.PinSize ?? 200;
+      pinSizeValue.textContent = `${Math.round(entry.PinSize ?? 200)}px`;
       ['Glass','Vegetation','Light','Location','Prevention'].forEach(key => {
         const el = document.getElementById(key.toLowerCase());
         el.value = entry[key];
@@ -695,6 +767,7 @@
       detailLevel.className = `chip ${entry.Level}`;
       renderBuildingList();
       updatePinAppearance(activeBuilding);
+      persistState();
     }
 
     function clampNumber(value, min, max) {
@@ -703,9 +776,18 @@
     }
 
     function handlePinSizeChange() {
-      const size = clampNumber(parseFloat(pinSizeInput.value), 10, 60);
-      document.documentElement.style.setProperty('--pin-size', `${size}px`);
+      if (!activeBuilding) {
+        statusText.textContent = 'Select a building to resize its marker.';
+        return;
+      }
+      const size = clampNumber(parseFloat(pinSizeInput.value), 200, 400);
+      const entry = dataState.get(activeBuilding);
+      if (!entry) return;
+      entry.PinSize = size;
       pinSizeValue.textContent = `${Math.round(size)}px`;
+      updatePinAppearance(activeBuilding);
+      renderBuildingList();
+      persistState();
     }
 
     function renameActiveBuilding(newName) {
@@ -742,6 +824,7 @@
       showDetail(trimmed);
       highlightPin(trimmed);
       statusText.textContent = `Renamed to ${trimmed}.`;
+      persistState();
     }
 
     function createBuilding() {
@@ -761,7 +844,8 @@
         Vegetation: clampNumber(parseFloat(newVegetation.value), 0, 10),
         Light: clampNumber(parseFloat(newLight.value), 0, 10),
         Location: clampNumber(parseFloat(newLocation.value), 0, 10),
-        Prevention: clampNumber(parseFloat(newPrevention.value), 0, 10)
+        Prevention: clampNumber(parseFloat(newPrevention.value), 0, 10),
+        PinSize: clampNumber(parseFloat(pinSizeInput.value) || 200, 200, 400)
       };
       entry.Score = computeScore(entry);
       entry.Level = computeRisk(entry.Score);
@@ -772,6 +856,7 @@
       placementTarget = name;
       statusText.textContent = `New building added. Click on the map to place ${name}.`;
       buildingSelect.value = name;
+      persistState();
     }
 
     function resetNewBuildingForm() {
@@ -810,10 +895,10 @@
       const scaleX = viewW / mapSize.width;
       const scaleY = viewH / mapSize.height;
       scale = Math.min(scaleX, scaleY);
-      minScale = Math.min(scale, 0.6);
-      maxScale = Math.max(2.5, scale + 1.5);
-      translateX = (viewW - mapSize.width * scale) / 2;
-      translateY = (viewH - mapSize.height * scale) / 2;
+      minScale = scale; // start at tightest fit
+      maxScale = Math.max(3, scale + 2.5);
+      translateX = 0;
+      translateY = 0;
       applyTransform();
     }
 
@@ -831,8 +916,8 @@
       const minY = Math.min(0, viewH - mapH);
       const maxX = Math.max(0, viewW - mapW);
       const maxY = Math.max(0, viewH - mapH);
-      translateX = Math.min(Math.max(translateX, minX - 80), maxX + 80);
-      translateY = Math.min(Math.max(translateY, minY - 80), maxY + 80);
+      translateX = Math.min(Math.max(translateX, minX - 40), maxX + 40);
+      translateY = Math.min(Math.max(translateY, minY - 40), maxY + 40);
     }
 
     function startPan(e) {
@@ -844,6 +929,17 @@
     }
 
     function onPan(e) {
+      if (draggingPin) {
+        const coords = clientToMapCoords(e.clientX, e.clientY);
+        if (coords && pins.has(draggingPin)) {
+          const pin = pins.get(draggingPin);
+          pin.xPct = coords.xPct;
+          pin.yPct = coords.yPct;
+          updatePinAppearance(draggingPin);
+          dragMoved = true;
+        }
+        return;
+      }
       if (!isPanning) return;
       const dx = e.clientX - panStart.x;
       const dy = e.clientY - panStart.y;
@@ -855,6 +951,13 @@
     }
 
     function endPan() {
+      if (draggingPin) {
+        persistState();
+        statusText.textContent = `Pin moved for ${draggingPin}.`;
+        draggingPin = null;
+        setTimeout(() => { dragMoved = false; }, 50);
+        return;
+      }
       if (!isPanning) return;
       isPanning = false;
       mapShell.classList.remove('dragging');
@@ -903,6 +1006,7 @@
           e.stopPropagation();
           selectBuilding(building);
         });
+        el.addEventListener('mousedown', (e) => startPinDrag(e, building));
         pinsLayer.appendChild(el);
         pin = { el, xPct, yPct };
         pins.set(building, pin);
@@ -912,6 +1016,7 @@
       }
       updatePinAppearance(building);
       renderBuildingList();
+      persistState();
     }
 
     function removePin(building) {
@@ -924,6 +1029,7 @@
       if (activeBuilding === building) {
         highlightPin(null);
       }
+      persistState();
     }
 
     function updatePinAppearance(building) {
@@ -932,7 +1038,10 @@
       if (!pin || !entry) return;
       pin.el.style.left = `${pin.xPct}%`;
       pin.el.style.top = `${pin.yPct}%`;
-      pin.el.style.background = riskColors[entry.Level] || '#999';
+      const size = clampNumber(entry.PinSize ?? 200, 200, 400);
+      pin.el.style.setProperty('--pin-size', `${size}px`);
+      pin.el.style.backgroundImage = `url(${riskIcons[entry.Level] || riskIcons.Low})`;
+      pin.el.style.setProperty('--pin-tail-color', riskColors[entry.Level] || '#999');
       pin.el.dataset.level = entry.Level;
       highlightPin(activeBuilding);
     }
@@ -942,6 +1051,13 @@
         if (key === building) pin.el.classList.add('active');
         else pin.el.classList.remove('active');
       });
+    }
+
+    function startPinDrag(e, building) {
+      e.preventDefault();
+      draggingPin = building;
+      dragMoved = true;
+      selectBuilding(building);
     }
 
     boot();
