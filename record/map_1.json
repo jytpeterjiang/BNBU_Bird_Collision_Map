@@ -1,0 +1,726 @@
+{
+  "entries": {
+    "T1": {
+      "building": "T1",
+      "Glass": 9,
+      "Vegetation": 8,
+      "Light": 5,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "T2": {
+      "building": "T2",
+      "Glass": 9,
+      "Vegetation": 5,
+      "Light": 5,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "T3": {
+      "building": "T3",
+      "Glass": 9,
+      "Vegetation": 5,
+      "Light": 5,
+      "Location": 10,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "T4": {
+      "building": "T4",
+      "Glass": 10,
+      "Vegetation": 10,
+      "Light": 5,
+      "Location": 10,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "T5": {
+      "building": "T5",
+      "Glass": 9,
+      "Vegetation": 5,
+      "Light": 5,
+      "Location": 6,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "T6": {
+      "building": "T6",
+      "Glass": 10,
+      "Vegetation": 5,
+      "Light": 5,
+      "Location": 7,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "T7": {
+      "building": "T7",
+      "Glass": 10,
+      "Vegetation": 6,
+      "Light": 5,
+      "Location": 8,
+      "Prevention": 8,
+      "PinSize": 200
+    },
+    "T8": {
+      "building": "T8",
+      "Glass": 10,
+      "Vegetation": 7,
+      "Light": 5,
+      "Location": 10,
+      "Prevention": 8,
+      "PinSize": 200
+    },
+    "T29": {
+      "building": "T29",
+      "Glass": 9,
+      "Vegetation": 8,
+      "Light": 5,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Art Hills": {
+      "building": "Art Hills",
+      "Glass": 6,
+      "Vegetation": 10,
+      "Light": 4,
+      "Location": 4,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Cultural Creativity Clusters": {
+      "building": "Cultural Creativity Clusters",
+      "Glass": 9,
+      "Vegetation": 5,
+      "Light": 8,
+      "Location": 9,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Performance Theater": {
+      "building": "Performance Theater",
+      "Glass": 9,
+      "Vegetation": 4,
+      "Light": 8,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Administration Building": {
+      "building": "Administration Building",
+      "Glass": 10,
+      "Vegetation": 10,
+      "Light": 8,
+      "Location": 9,
+      "Prevention": 7,
+      "PinSize": 140
+    },
+    "University Hall": {
+      "building": "University Hall",
+      "Glass": 10,
+      "Vegetation": 10,
+      "Light": 8,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Sports Complex": {
+      "building": "Sports Complex",
+      "Glass": 10,
+      "Vegetation": 4,
+      "Light": 7,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Learning Resource Centre": {
+      "building": "Learning Resource Centre",
+      "Glass": 10,
+      "Vegetation": 8,
+      "Light": 8,
+      "Location": 9,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Bridge AH to Island": {
+      "building": "Bridge AH to Island",
+      "Glass": 9,
+      "Vegetation": 2,
+      "Light": 2,
+      "Location": 7,
+      "Prevention": 8,
+      "PinSize": 200
+    },
+    "Bridge T4 to Island": {
+      "building": "Bridge T4 to Island",
+      "Glass": 9,
+      "Vegetation": 2,
+      "Light": 2,
+      "Location": 7,
+      "Prevention": 8,
+      "PinSize": 200
+    },
+    "Bridge Island to CC": {
+      "building": "Bridge Island to CC",
+      "Glass": 9,
+      "Vegetation": 4,
+      "Light": 1,
+      "Location": 8,
+      "Prevention": 8,
+      "PinSize": 200
+    },
+    "Bridge T8 to T29": {
+      "building": "Bridge T8 to T29",
+      "Glass": 9,
+      "Vegetation": 5,
+      "Light": 1,
+      "Location": 9,
+      "Prevention": 5,
+      "PinSize": 200
+    },
+    "V15": {
+      "building": "V15",
+      "Glass": 4,
+      "Vegetation": 8,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V16": {
+      "building": "V16",
+      "Glass": 4,
+      "Vegetation": 5,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V17": {
+      "building": "V17",
+      "Glass": 4,
+      "Vegetation": 6,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V18": {
+      "building": "V18",
+      "Glass": 4,
+      "Vegetation": 7,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V19": {
+      "building": "V19",
+      "Glass": 4,
+      "Vegetation": 6,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V20": {
+      "building": "V20",
+      "Glass": 4,
+      "Vegetation": 6,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V21": {
+      "building": "V21",
+      "Glass": 4,
+      "Vegetation": 3,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V22": {
+      "building": "V22",
+      "Glass": 4,
+      "Vegetation": 5,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V23": {
+      "building": "V23",
+      "Glass": 4,
+      "Vegetation": 5,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V24": {
+      "building": "V24",
+      "Glass": 4,
+      "Vegetation": 2,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V25": {
+      "building": "V25",
+      "Glass": 4,
+      "Vegetation": 4,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V26": {
+      "building": "V26",
+      "Glass": 4,
+      "Vegetation": 4,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V27": {
+      "building": "V27",
+      "Glass": 4,
+      "Vegetation": 8,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V28": {
+      "building": "V28",
+      "Glass": 4,
+      "Vegetation": 3,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "V29": {
+      "building": "V29",
+      "Glass": 4,
+      "Vegetation": 3,
+      "Light": 7,
+      "Location": 5,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Institution for Advanced Study": {
+      "building": "Institution for Advanced Study",
+      "Glass": 10,
+      "Vegetation": 10,
+      "Light": 7,
+      "Location": 10,
+      "Prevention": 10,
+      "PinSize": 200
+    },
+    "D1": {
+      "building": "D1",
+      "Glass": 5,
+      "Vegetation": 8,
+      "Light": 4,
+      "Location": 7,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "D2": {
+      "building": "D2",
+      "Glass": 6,
+      "Vegetation": 8,
+      "Light": 5,
+      "Location": 7,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "D3": {
+      "building": "D3",
+      "Glass": 5,
+      "Vegetation": 7,
+      "Light": 4,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "D4": {
+      "building": "D4",
+      "Glass": 5,
+      "Vegetation": 8,
+      "Light": 4,
+      "Location": 7,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "D5": {
+      "building": "D5",
+      "Glass": 6,
+      "Vegetation": 7,
+      "Light": 5,
+      "Location": 7,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "D6": {
+      "building": "D6",
+      "Glass": 5,
+      "Vegetation": 8,
+      "Light": 5,
+      "Location": 8,
+      "Prevention": 7,
+      "PinSize": 200
+    },
+    "Huitong Village": {
+      "building": "Huitong Village",
+      "Glass": 1,
+      "Vegetation": 8,
+      "Light": 8,
+      "Location": 5,
+      "Prevention": 8,
+      "PinSize": 200
+    },
+    "Sports Park": {
+      "building": "Sports Park",
+      "Glass": 1,
+      "Vegetation": 8,
+      "Light": 1,
+      "Location": 4,
+      "Prevention": 8,
+      "PinSize": 200
+    }
+  },
+  "pins": {
+    "Administration Building": {
+      "xPct": 87.73044855002775,
+      "yPct": 59.813343663747645
+    },
+    "Art Hills": {
+      "xPct": 76.03993290346261,
+      "yPct": 17.776450994563696
+    },
+    "Bridge AH to Island": {
+      "xPct": 79.76567650178957,
+      "yPct": 33.73002260733959
+    },
+    "Bridge Island to CC": {
+      "xPct": 82.84918065057272,
+      "yPct": 41.58679117843903
+    },
+    "Bridge T4 to Island": {
+      "xPct": 77.57638855615355,
+      "yPct": 38.60812617071451
+    },
+    "Bridge T8 to T29": {
+      "xPct": 51.4664775311234,
+      "yPct": 49.84970333573675
+    },
+    "Cultural Creativity Clusters": {
+      "xPct": 88.22132245740958,
+      "yPct": 40.30887484638283
+    },
+    "D1": {
+      "xPct": 17.509727737858075,
+      "yPct": 15.512680096328827
+    },
+    "D2": {
+      "xPct": 21.48744808978832,
+      "yPct": 21.08148858903117
+    },
+    "D3": {
+      "xPct": 21.85746858764229,
+      "yPct": 27.25466389489501
+    },
+    "D4": {
+      "xPct": 12.765707175962179,
+      "yPct": 33.016059070376116
+    },
+    "D5": {
+      "xPct": 8.109615911299645,
+      "yPct": 26.02267166093597
+    },
+    "D6": {
+      "xPct": 10.853934603716636,
+      "yPct": 18.59759367066618
+    },
+    "Huitong Village": {
+      "xPct": 26.39479551358364,
+      "yPct": 53.78037600828176
+    },
+    "Sports Park": {
+      "xPct": 37.87797372962834,
+      "yPct": 25.967878326616724
+    },
+    "V16": {
+      "xPct": 71.34008929423146,
+      "yPct": 27.139052371377836
+    },
+    "V15": {
+      "xPct": 64.6078303294482,
+      "yPct": 25.18709563010932
+    },
+    "V17": {
+      "xPct": 56.28213729016005,
+      "yPct": 28.031375453100583
+    },
+    "V18": {
+      "xPct": 62.37729844890802,
+      "yPct": 30.713471075744042
+    },
+    "V19": {
+      "xPct": 50.38643121449189,
+      "yPct": 32.43722066910666
+    },
+    "V20": {
+      "xPct": 55.60492780849546,
+      "yPct": 36.78729569250507
+    },
+    "V21": {
+      "xPct": 45.20777047235093,
+      "yPct": 37.17768704075877
+    },
+    "V22": {
+      "xPct": 51.26281995546959,
+      "yPct": 39.687345708104004
+    },
+    "V23": {
+      "xPct": 42.73794765686832,
+      "yPct": 42.42008514587992
+    },
+    "V24": {
+      "xPct": 38.75436247060603,
+      "yPct": 49.39135922183891
+    },
+    "V25": {
+      "xPct": 50.18310398113495,
+      "yPct": 53.97389444781836
+    },
+    "V26": {
+      "xPct": 45.24760632421355,
+      "yPct": 59.48576408382752
+    },
+    "V27": {
+      "xPct": 36.682898173749656,
+      "yPct": 64.17046026287197
+    },
+    "V28": {
+      "xPct": 54.80821077124302,
+      "yPct": 66.28972758196349
+    },
+    "V29": {
+      "xPct": 45.367113879801416,
+      "yPct": 64.78393238155635
+    },
+    "Institution for Advanced Study": {
+      "xPct": 13.521995390813526,
+      "yPct": 9.817197018128647
+    },
+    "Learning Resource Centre": {
+      "xPct": 71.64351399695431,
+      "yPct": 46.06742759988492
+    },
+    "Performance Theater": {
+      "xPct": 85.50481077878868,
+      "yPct": 51.53606716970556
+    },
+    "Sports Complex": {
+      "xPct": 71.85674300557022,
+      "yPct": 64.77939913999407
+    },
+    "T1": {
+      "xPct": 72.23324142690039,
+      "yPct": 56.21406005473284
+    },
+    "T2": {
+      "xPct": 66.63282740961421,
+      "yPct": 55.62107504113782
+    },
+    "T29": {
+      "xPct": 47.27614929870895,
+      "yPct": 47.251773731643986
+    },
+    "T3": {
+      "xPct": 60.88488244089698,
+      "yPct": 53.69667759911402
+    },
+    "T4": {
+      "xPct": 73.86890171059302,
+      "yPct": 36.041396224343444
+    },
+    "T5": {
+      "xPct": 70.3244136915668,
+      "yPct": 38.496420557521596
+    },
+    "T6": {
+      "xPct": 65.77254486713313,
+      "yPct": 38.80982791920392
+    },
+    "T7": {
+      "xPct": 59.65363923428788,
+      "yPct": 42.414012578550576
+    },
+    "T8": {
+      "xPct": 54.01976880404621,
+      "yPct": 43.19753098275637
+    },
+    "University Hall": {
+      "xPct": 84.50236576767163,
+      "yPct": 61.06175059864849
+    }
+  },
+  "photos": {
+    "Administration Building": [
+      "photo/Administration_1.jpg"
+    ],
+    "Art Hills": [
+      "photo/AH_1.jpg",
+      "photo/AH_2.jpg"
+    ],
+    "Bridge AH to Island": [
+      "photo/Bridge_AH_Island.jpg"
+    ],
+    "Bridge Island to CC": [
+      "photo/Bridge_Island_CC_1.jpg",
+      "photo/Bridge_Island_CC_2.jpg"
+    ],
+    "Bridge T4 to Island": [
+      "photo/Bridge_T4_Island.jpg"
+    ],
+    "Bridge T8 to T29": [
+      "photo/Bridge_T8_V29.jpg"
+    ],
+    "Cultural Creativity Clusters": [
+      "photo/CC_1.jpg",
+      "photo/CC_2.jpg",
+      "photo/CC_3.jpg",
+      "photo/CC_4.jpg"
+    ],
+    "D1": [
+      "photo/D1.jpg"
+    ],
+    "D2": [
+      "photo/D2.jpg"
+    ],
+    "D6": [
+      "photo/D6_1.jpg",
+      "photo/D6_2.jpg"
+    ],
+    "Institution for Advanced Study": [
+      "photo/IAS_1.jpg"
+    ],
+    "Learning Resource Centre": [
+      "photo/LRC_1.jpg",
+      "photo/LRC_2.jpg",
+      "photo/LRC_3.png",
+      "photo/LRC_4.jpg",
+      "photo/LRC_5.jpg",
+      "photo/LRC_6.jpg"
+    ],
+    "Performance Theater": [
+      "photo/Performance_1.jpg"
+    ],
+    "T1": [
+      "photo/T1_1.jpg"
+    ],
+    "T2": [
+      "photo/T2_1.jpg",
+      "photo/T2_2.jpg",
+      "photo/T2_3.jpg"
+    ],
+    "T3": [
+      "photo/T3_1.jpg",
+      "photo/T3_2.jpg",
+      "photo/T3_3.jpg"
+    ],
+    "T4": [
+      "photo/T4_1.jpg",
+      "photo/T4_2.jpg",
+      "photo/T4_3.jpg"
+    ],
+    "T5": [
+      "photo/T5_1.jpg",
+      "photo/T5_2.jpg"
+    ],
+    "T6": [
+      "photo/T6_1.jpg",
+      "photo/T6_2.jpg"
+    ],
+    "T7": [
+      "photo/T7_1.jpg",
+      "photo/T7_2.jpg"
+    ],
+    "T8": [
+      "photo/T8_1.jpg"
+    ],
+    "T29": [
+      "photo/T29_1.jpg",
+      "photo/T29_2.jpg",
+      "photo/T29_3.jpg",
+      "photo/T29_4.jpg",
+      "photo/T29_5.jpg"
+    ],
+    "University Hall": [
+      "photo/UH_1.jpg",
+      "photo/UH_2.jpg",
+      "photo/UH_3.jpg",
+      "photo/UH_4.jpg"
+    ],
+    "V15": [
+      "photo/V15_1.jpg"
+    ],
+    "V16": [
+      "photo/V16_1.jpg",
+      "photo/V16_2.jpg",
+      "photo/V16_3.jpg",
+      "photo/V16_4.jpg"
+    ],
+    "V17": [
+      "photo/V17_1.jpg"
+    ],
+    "V18": [
+      "photo/V18_1.jpg"
+    ],
+    "V19": [
+      "photo/V19_1.jpg"
+    ],
+    "V20": [
+      "photo/V20_1.jpg"
+    ],
+    "V21": [
+      "photo/V21_1.jpg"
+    ],
+    "V22": [
+      "photo/V22_1.jpg",
+      "photo/V22_2.jpg",
+      "photo/V22_3.jpg"
+    ],
+    "V24": [
+      "photo/V24_1.jpg"
+    ],
+    "V25": [
+      "photo/V25_1.jpg",
+      "photo/V25_2.jpg"
+    ],
+    "V26": [
+      "photo/V26_1.jpg",
+      "photo/V26_2.jpg"
+    ],
+    "V27": [
+      "photo/V27_1.jpg"
+    ],
+    "V28": [
+      "photo/V28_1.jpg",
+      "photo/V28_2.jpg"
+    ],
+    "V29": [
+      "photo/V29_1.jpg"
+    ]
+  }
+}

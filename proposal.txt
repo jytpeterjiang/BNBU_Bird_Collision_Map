@@ -71,3 +71,17 @@ Add building下的name和Details & Editing下的Building name的背景为白色�
 作者：jytpeterjiang
 Github图标：github.png
 Github仓库链接：https://github.com/jytpeterjiang/BNBU_Bird_Collision_Map
+
+我更改了图片等文件的位置，请你重新扫描我的工作区并对应好文件，不用管photo和record文件夹
+
+现在我为每个建筑添加了现场拍摄图片，并储存在photo文件夹内，部分特殊的缩写对应表格中的建筑名已给出，在photo_building.txt中
+图片名格式为building_number，例如LRC_1为Learning Resource Centre的第一个图片,V16_1为V16的第一个图片
+我现在想在点击一个建筑图钉时候，在地图下方显示该建筑的一张图片，鼠标放在图片右边会变成右箭头，鼠标放在图片左边会变成左箭头，点击后会切换下一张照片
+目前作者信息位于地图下方的左边，在建筑没有对应现场图片时保持原状，如果有图片，那么在图片下方的左边显示
+目前我标记好了所有建筑并导出了json文件，在map_1.json中，我希望在你新添加这个图片显示功能后，同时更新必要的json文件，让我导入后可以直接预览每个标注好的建筑现场图片，这样我就不用重复标注了
+
+我忘记添加了University Hall和Institution for Advanced Study了，我现在更新了相关的文档和图片
+请你查看我的更新，并且将新的图片链接到对应建筑
+我目前在游览图片时发现错误，鼠标移动到图片时，大半右边被一层模糊的灰色覆盖，而且在图片左或者右侧点击只能切换下一张，无法在左侧时单击回到上一张，
+请你先修复这个bug，再新增一个实时图片删除和添加功能，会弹出一个文件管理资源器的弹窗，用户可以选择本地的图片并导入，并且保证在导出json文件时含有图片部分的数据
+

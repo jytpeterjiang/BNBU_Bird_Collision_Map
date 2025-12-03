@@ -1,0 +1,45 @@
+Building,Glass,Vegetation,Light,Location,Prevention,Score,Level
+T1,9,8,5,8,7,7.7,High
+T2,9,5,5,8,7,6.95,Median
+T3,9,5,5,10,7,7.25,High
+T4,10,10,5,10,7,8.85,High
+T5,9,5,5,6,7,6.65,Median
+T6,10,5,5,7,7,7.15,High
+T7,10,6,5,8,8,7.6,High
+T8,10,7,5,10,8,8.15,High
+T29,9,8,5,8,7,7.7,High
+Art Hills,6,10,4,4,7,6.35,Median
+Cultural Creativity Clusters,9,5,8,9,7,7.7,High
+Performance Theater,9,4,8,8,7,7.3,High
+Administration Building,10,10,8,9,7,9.3,High
+University Hall,10,10,8,8,7,9.15,High
+Sports Complex,10,4,7,8,7,7.45,High
+Learning Resource Centre,10,8,8,9,7,8.8,High
+Bridge AH to Island,9,2,2,7,8,5.5,Median
+Bridge T4 to Island,9,2,2,7,8,5.5,Median
+Bridge Island to CC,9,4,1,8,8,5.95,Median
+Bridge T8 to T29,9,5,1,9,5,6.2,Median
+V15,4,8,7,5,7,5.9,Median
+V16,4,5,7,5,7,5.15,Median
+V17,4,6,7,5,7,5.4,Median
+V18,4,7,7,5,7,5.65,Median
+V19,4,6,7,5,7,5.4,Median
+V20,4,6,7,5,7,5.4,Median
+V21,4,3,7,5,7,4.65,Median
+V22,4,5,7,5,7,5.15,Median
+V23,4,5,7,5,7,5.15,Median
+V24,4,2,7,5,7,4.4,Median
+V25,4,4,7,5,7,4.9,Median
+V26,4,4,7,5,7,4.9,Median
+V27,4,8,7,5,7,5.9,Median
+V28,4,3,7,5,7,4.65,Median
+V29,4,3,7,5,7,4.65,Median
+Institution for Advanced Study,10,10,7,10,10,9.4,High
+D1,5,8,4,7,7,5.95,Median
+D2,6,8,5,7,7,6.5,Median
+D3,5,7,4,8,7,5.85,Median
+D4,5,8,4,7,7,5.95,Median
+D5,6,7,5,7,7,6.25,Median
+D6,5,8,5,8,7,6.3,Median
+Huitong Village,1,8,8,5,8,5.1,Median
+Sports Park,1,8,1,4,8,3.55,Low

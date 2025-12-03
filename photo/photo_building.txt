@@ -1,0 +1,11 @@
+Administration, Administration Building
+Art Hills, AH
+Bridge_AH_Island, Bridge AH to Island
+Bridge_Island_CC, Bridge Island to CC
+Bridge_T4_Island, Bridge T4 to Island
+Bridge_T8_V29, Bridge T8 to V29
+LRC, Learning Resource Centre
+Performance, Performance Theater
+CC, Cultural Creativity Clusters
+UH, University Hall
+IAS, Institution for Advanced Study

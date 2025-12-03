@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BNBU Bird Collision Risk Map</title>
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" href="picture/logo.png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
     :root {
@@ -348,6 +348,79 @@
       gap: 10px;
     }
     .status-bar strong { color: var(--ink); }
+    .media-area {
+      padding: 0 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .photo-viewer {
+      position: relative;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      min-height: 200px;
+    }
+    .photo-viewer.hidden {
+      display: none;
+    }
+    .photo-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d1f19;
+    }
+    .photo-frame img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      display: block;
+      background: #0d1f19;
+      user-select: none;
+    }
+    .photo-nav {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 36%;
+      background: transparent;
+      cursor: pointer;
+      opacity: 1;
+      transition: opacity 0.12s ease;
+      z-index: 2;
+    }
+    .photo-nav.right {
+      right: 0;
+      left: 64%;
+      cursor: pointer;
+    }
+    .photo-viewer:hover .photo-nav { opacity: 1; }
+    .photo-caption {
+      position: absolute;
+      left: 14px;
+      bottom: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.45);
+      color: #f5fff8;
+      font-size: 12px;
+      letter-spacing: 0.2px;
+    }
+    .photo-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 0 4px;
+    }
+    .photo-actions .button {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
     .author-info {
       display: flex;
       align-items: center;
@@ -355,6 +428,9 @@
       padding: 4px 18px 18px;
       color: var(--muted);
       font-size: 13px;
+    }
+    .author-info.with-photo {
+      padding-top: 0;
     }
     .author-info .avatar {
       width: 46px;
@@ -411,7 +487,7 @@
   <div class="page">
     <header>
       <div class="brand-row">
-        <img src="logo.png" alt="Site logo" class="logo-mark">
+        <img src="picture/logo.png" alt="Site logo" class="logo-mark">
         <div>
           <h1>BNBU Bird Collision Risk Map</h1>
           <p>Environmental Monitoring (1016 25-26S1) Group Project (Group 1)</p>
@@ -442,14 +518,29 @@
           <div><strong>Pan:</strong> click + drag &nbsp;|&nbsp; <strong>Zoom:</strong> mouse wheel</div>
           <div id="status-text">Select a building, then click “Place pin” and drop it on the map.</div>
         </div>
-        <div class="author-info">
-          <img src="portrait.jpg" alt="portrait" class="avatar">
-          <div class="author-meta">
-            <strong>jytpeterjiang</strong>
-            <a class="author-link" href="https://github.com/jytpeterjiang/BNBU_Bird_Collision_Map" target="_blank" rel="noopener noreferrer">
-              <img src="github.png" alt="GitHub">
-              <span>Github Repository</span>
-            </a>
+        <div class="media-area">
+          <div class="photo-viewer hidden" id="photo-viewer" aria-live="polite">
+            <div class="photo-frame">
+              <img id="photo-image" alt="Building photo">
+              <div class="photo-nav left" id="photo-prev" aria-label="Previous photo"></div>
+              <div class="photo-nav right" id="photo-next" aria-label="Next photo"></div>
+              <div class="photo-caption" id="photo-caption"></div>
+            </div>
+          </div>
+          <div class="photo-actions">
+            <button class="button secondary" type="button" id="add-photo">Add photo</button>
+            <button class="button secondary" type="button" id="delete-photo">Delete photo</button>
+            <input id="photo-file-input" type="file" accept="image/*" multiple style="display:none;">
+          </div>
+          <div class="author-info" id="author-info">
+            <img src="picture/portrait.jpg" alt="portrait" class="avatar">
+            <div class="author-meta">
+              <strong>jytpeterjiang</strong>
+              <a class="author-link" href="https://github.com/jytpeterjiang/BNBU_Bird_Collision_Map" target="_blank" rel="noopener noreferrer">
+                <img src="picture/github.png" alt="GitHub">
+                <span>Github Repository</span>
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -568,7 +659,169 @@
 
   <script>
     const riskColors = { Low: getComputedStyle(document.documentElement).getPropertyValue('--low'), Median: getComputedStyle(document.documentElement).getPropertyValue('--medium'), High: getComputedStyle(document.documentElement).getPropertyValue('--high') };
-    const riskIcons = { Low: 'green.png', Median: 'yellow.png', High: 'red.png' };
+    const riskIcons = { Low: 'picture/green.png', Median: 'picture/yellow.png', High: 'picture/red.png' };
+    const defaultPhotoLibrary = {
+      "Administration Building": [
+        "photo/Administration_1.jpg"
+      ],
+      "Art Hills": [
+        "photo/AH_1.jpg",
+        "photo/AH_2.jpg"
+      ],
+      "Bridge AH to Island": [
+        "photo/Bridge_AH_Island.jpg"
+      ],
+      "Bridge Island to CC": [
+        "photo/Bridge_Island_CC_1.jpg",
+        "photo/Bridge_Island_CC_2.jpg"
+      ],
+      "Bridge T4 to Island": [
+        "photo/Bridge_T4_Island.jpg"
+      ],
+      "Bridge T8 to T29": [
+        "photo/Bridge_T8_V29.jpg"
+      ],
+      "Cultural Creativity Clusters": [
+        "photo/CC_1.jpg",
+        "photo/CC_2.jpg",
+        "photo/CC_3.jpg",
+        "photo/CC_4.jpg"
+      ],
+      "D1": [
+        "photo/D1.jpg"
+      ],
+      "D2": [
+        "photo/D2.jpg"
+      ],
+      "D6": [
+        "photo/D6_1.jpg",
+        "photo/D6_2.jpg"
+      ],
+      "Institution for Advanced Study": [
+        "photo/IAS_1.jpg"
+      ],
+      "Learning Resource Centre": [
+        "photo/LRC_1.jpg",
+        "photo/LRC_2.jpg",
+        "photo/LRC_3.png",
+        "photo/LRC_4.jpg",
+        "photo/LRC_5.jpg",
+        "photo/LRC_6.jpg"
+      ],
+      "Performance Theater": [
+        "photo/Performance_1.jpg"
+      ],
+      "T1": [
+        "photo/T1_1.jpg"
+      ],
+      "T2": [
+        "photo/T2_1.jpg",
+        "photo/T2_2.jpg",
+        "photo/T2_3.jpg"
+      ],
+      "T3": [
+        "photo/T3_1.jpg",
+        "photo/T3_2.jpg",
+        "photo/T3_3.jpg"
+      ],
+      "T4": [
+        "photo/T4_1.jpg",
+        "photo/T4_2.jpg",
+        "photo/T4_3.jpg"
+      ],
+      "T5": [
+        "photo/T5_1.jpg",
+        "photo/T5_2.jpg"
+      ],
+      "T6": [
+        "photo/T6_1.jpg",
+        "photo/T6_2.jpg"
+      ],
+      "T7": [
+        "photo/T7_1.jpg",
+        "photo/T7_2.jpg"
+      ],
+      "T8": [
+        "photo/T8_1.jpg"
+      ],
+      "T29": [
+        "photo/T29_1.jpg",
+        "photo/T29_2.jpg",
+        "photo/T29_3.jpg",
+        "photo/T29_4.jpg",
+        "photo/T29_5.jpg"
+      ],
+      "University Hall": [
+        "photo/UH_1.jpg",
+        "photo/UH_2.jpg",
+        "photo/UH_3.jpg",
+        "photo/UH_4.jpg"
+      ],
+      "V15": [
+        "photo/V15_1.jpg"
+      ],
+      "V16": [
+        "photo/V16_1.jpg",
+        "photo/V16_2.jpg",
+        "photo/V16_3.jpg",
+        "photo/V16_4.jpg"
+      ],
+      "V17": [
+        "photo/V17_1.jpg"
+      ],
+      "V18": [
+        "photo/V18_1.jpg"
+      ],
+      "V19": [
+        "photo/V19_1.jpg"
+      ],
+      "V20": [
+        "photo/V20_1.jpg"
+      ],
+      "V21": [
+        "photo/V21_1.jpg"
+      ],
+      "V22": [
+        "photo/V22_1.jpg",
+        "photo/V22_2.jpg",
+        "photo/V22_3.jpg"
+      ],
+      "V24": [
+        "photo/V24_1.jpg"
+      ],
+      "V25": [
+        "photo/V25_1.jpg",
+        "photo/V25_2.jpg"
+      ],
+      "V26": [
+        "photo/V26_1.jpg",
+        "photo/V26_2.jpg"
+      ],
+      "V27": [
+        "photo/V27_1.jpg"
+      ],
+      "V28": [
+        "photo/V28_1.jpg",
+        "photo/V28_2.jpg"
+      ],
+      "V29": [
+        "photo/V29_1.jpg"
+      ]
+    };
+    function clonePhotoLibrary(source) {
+      const out = {};
+      Object.keys(source || {}).forEach(key => { out[key] = [...source[key]]; });
+      return out;
+    }
+    function cleanPhotoList(list) {
+      if (!Array.isArray(list)) return [];
+      const cleaned = list
+        .filter(item => typeof item === 'string' && item && !item.startsWith('data:'))
+        .map(item => item.trim());
+      return Array.from(new Set(cleaned));
+    }
+    let photoLibrary = clonePhotoLibrary(defaultPhotoLibrary);
+    const photoIndex = new Map();
     const STORAGE_KEY = 'bird-collision-map-state';
     let isRestoring = false;
     let draggingPin = null;
@@ -585,6 +838,7 @@
     let panStart = { x: 0, y: 0 };
     let minScale = 0.5;
     let maxScale = 3;
+    let photoAddTarget = null;
 
     const buildingSelect = document.getElementById('building-select');
     const buildingList = document.getElementById('building-list');
@@ -598,6 +852,15 @@
     const statusText = document.getElementById('status-text');
     const pinSizeInput = document.getElementById('pin-size');
     const pinSizeValue = document.getElementById('pin-size-value');
+    const photoViewer = document.getElementById('photo-viewer');
+    const photoImage = document.getElementById('photo-image');
+    const photoCaption = document.getElementById('photo-caption');
+    const photoPrev = document.getElementById('photo-prev');
+    const photoNext = document.getElementById('photo-next');
+    const authorInfo = document.getElementById('author-info');
+    const addPhotoBtn = document.getElementById('add-photo');
+    const deletePhotoBtn = document.getElementById('delete-photo');
+    const photoFileInput = document.getElementById('photo-file-input');
     const exportBtn = document.getElementById('export-json');
     const importBtn = document.getElementById('import-json');
     const importFileInput = document.getElementById('import-file');
@@ -631,6 +894,19 @@
         statusText.textContent = `Pin removed for ${building}.`;
       }
     });
+    photoPrev.addEventListener('click', () => cyclePhoto(1));
+    photoNext.addEventListener('click', () => cyclePhoto(1));
+    addPhotoBtn.addEventListener('click', () => {
+      if (!activeBuilding) {
+        statusText.textContent = 'Select a building before adding photos.';
+        return;
+      }
+      photoAddTarget = activeBuilding;
+      photoFileInput.value = '';
+      photoFileInput.click();
+    });
+    deletePhotoBtn.addEventListener('click', removeCurrentPhoto);
+    photoFileInput.addEventListener('change', handlePhotoFiles);
     document.getElementById('create-building').addEventListener('click', createBuilding);
     document.getElementById('reset-new-building').addEventListener('click', resetNewBuildingForm);
     pinSizeInput.addEventListener('input', handlePinSizeChange);
@@ -656,7 +932,7 @@
     }
 
     async function loadCsv() {
-      const res = await fetch('bird_collision_risk.csv');
+      const res = await fetch('data/bird_collision_risk.csv');
       const text = await res.text();
       const rows = parseCsv(text);
       rows.forEach(row => {
@@ -742,13 +1018,23 @@
       pins.forEach((pin, name) => {
         pinsState[name] = { xPct: pin.xPct, yPct: pin.yPct };
       });
-      return { entries, pins: pinsState };
+      const photosState = {};
+      Object.keys(photoLibrary).forEach(name => {
+        const cleaned = cleanPhotoList(photoLibrary[name]);
+        if (cleaned.length) photosState[name] = cleaned;
+      });
+      return { entries, pins: pinsState, photos: photosState };
     }
 
     function persistState() {
       if (isRestoring) return;
       const payload = buildStatePayload();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (err) {
+        console.error('Persist failed (likely storage quota exceeded)', err);
+        statusText.textContent = 'Storage is full; state not saved locally. Please export JSON to keep your photos.';
+      }
     }
 
     function populateBuildingSelect() {
@@ -798,6 +1084,7 @@
       renderBuildingList();
       showDetail(building);
       highlightPin(building);
+      showPhoto(building);
       statusText.textContent = `Editing ${building}.`;
     }
 
@@ -827,6 +1114,104 @@
       } else {
         placementInfo.textContent = 'No pin yet. Click “Place pin” and drop it on the map.';
       }
+    }
+
+    function getPhotosForBuilding(building) {
+      if (!building) return [];
+      return photoLibrary?.[building] ?? [];
+    }
+
+    function showPhoto(building, index = 0) {
+      const photos = cleanPhotoList(getPhotosForBuilding(building));
+      if (building && photos.length) {
+        photoLibrary[building] = photos;
+      }
+      if (!photos.length) {
+        photoImage.removeAttribute('src');
+        photoImage.alt = '';
+        photoCaption.textContent = '';
+        photoViewer.classList.add('hidden');
+        authorInfo.classList.remove('with-photo');
+        return;
+      }
+      const nextIndex = ((index % photos.length) + photos.length) % photos.length;
+      photoIndex.set(building, nextIndex);
+      photoImage.src = photos[nextIndex];
+      photoImage.alt = `${building} photo ${nextIndex + 1} of ${photos.length}`;
+      photoCaption.textContent = `${building} · ${nextIndex + 1} / ${photos.length}`;
+      photoViewer.classList.remove('hidden');
+      authorInfo.classList.add('with-photo');
+    }
+
+    function cyclePhoto(delta) {
+      if (!activeBuilding) return;
+      const photos = getPhotosForBuilding(activeBuilding);
+      if (!photos.length) return;
+      const currentIndex = photoIndex.get(activeBuilding) ?? 0;
+      const nextIndex = ((currentIndex + delta) % photos.length + photos.length) % photos.length;
+      showPhoto(activeBuilding, nextIndex);
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handlePhotoFiles(evt) {
+      const targetBuilding = photoAddTarget || activeBuilding;
+      if (!targetBuilding) {
+        statusText.textContent = 'Select a building before adding photos.';
+        photoFileInput.value = '';
+        photoAddTarget = null;
+        return;
+      }
+      const files = [...(evt.target.files || [])];
+      if (!files.length) return;
+      try {
+        const existing = cleanPhotoList(photoLibrary[targetBuilding]);
+        const newPaths = files.map(file => file.name.startsWith('photo/') ? file.name : `photo/${file.name}`);
+        const merged = Array.from(new Set(existing.concat(newPaths)));
+        photoLibrary[targetBuilding] = merged;
+        const startIndex = merged.length - newPaths.length;
+        showPhoto(targetBuilding, Math.max(startIndex, 0));
+        persistState();
+        statusText.textContent = `Added ${newPaths.length} photo(s) for ${targetBuilding}.`;
+      } catch (err) {
+        console.error(err);
+        statusText.textContent = 'Failed to add photo(s).';
+      } finally {
+        photoFileInput.value = '';
+        photoAddTarget = null;
+      }
+    }
+
+    function removeCurrentPhoto() {
+      if (!activeBuilding) {
+        statusText.textContent = 'Select a building before deleting photos.';
+        return;
+      }
+      const photos = photoLibrary[activeBuilding];
+      if (!photos || !photos.length) {
+        statusText.textContent = 'No photos to delete for this building.';
+        return;
+      }
+      const currentIndex = photoIndex.get(activeBuilding) ?? 0;
+      photos.splice(currentIndex, 1);
+      if (!photos.length) {
+        delete photoLibrary[activeBuilding];
+        photoIndex.delete(activeBuilding);
+        showPhoto(activeBuilding, 0);
+      } else {
+        const nextIndex = Math.min(currentIndex, photos.length - 1);
+        photoIndex.set(activeBuilding, nextIndex);
+        showPhoto(activeBuilding, nextIndex);
+      }
+      persistState();
+      statusText.textContent = `Removed a photo from ${activeBuilding}.`;
     }
 
     function handleDetailInput(evt) {
@@ -890,6 +1275,14 @@
         pins.delete(oldName);
         pins.set(trimmed, pin);
         pin.el.title = trimmed;
+      }
+      if (photoLibrary[oldName]) {
+        photoLibrary[trimmed] = photoLibrary[oldName];
+        delete photoLibrary[oldName];
+      }
+      if (photoIndex.has(oldName)) {
+        photoIndex.set(trimmed, photoIndex.get(oldName));
+        photoIndex.delete(oldName);
       }
       if (placementTarget === oldName) placementTarget = trimmed;
       activeBuilding = trimmed;
@@ -1137,6 +1530,15 @@
         pins.clear();
         activeBuilding = null;
       }
+      photoLibrary = clonePhotoLibrary(defaultPhotoLibrary);
+      const savedPhotos = saved.photos || {};
+      Object.keys(savedPhotos).forEach(name => {
+        const cleaned = cleanPhotoList(savedPhotos[name]);
+        if (cleaned.length) {
+          photoLibrary[name] = cleaned;
+        }
+      });
+      photoIndex.clear();
       const savedEntries = saved.entries || {};
       Object.keys(savedEntries).forEach(name => {
         const e = savedEntries[name];
@@ -1156,9 +1558,11 @@
       highlightPin(activeBuilding);
       if (activeBuilding && dataState.has(activeBuilding)) {
         showDetail(activeBuilding);
+        showPhoto(activeBuilding, photoIndex.get(activeBuilding) ?? 0);
       } else {
         detailForm.style.display = 'none';
         detailEmpty.style.display = 'block';
+        showPhoto(null);
       }
       isRestoring = false;
     }
